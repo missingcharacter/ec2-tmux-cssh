@@ -6,6 +6,7 @@ tmux cluster ssh to multiple ec2 instances via bastion host
 
 ## Requirements
 
+- AWS access to [DescribeInstances](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html)
 - Private ssh keys for the servers you will try to connect to in `~/.ssh`
 - [tmux-cssh](https://github.com/zinic/tmux-cssh/blob/042fdec2dc51bcfe62499e72f589dc9c146ab71a/tmux-cssh) in your `${PATH}`
 - [poetry](https://github.com/python-poetry/poetry)
