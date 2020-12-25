@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+import boto3
+import inquirer
+
+from pathlib import Path
+from subprocess import run
+
+known_ssh_users = sorted(["ubuntu", "ec2-user", "centos"])
+ec2_client = boto3.client('ec2')
+
+ec2_instances = [
+    instance
+    for page in ec2_client.get_paginator("describe_instances").paginate()
+    for reservations in page["Reservations"]
+    for instance in reservations["Instances"]
+]
+
+unique_tags = dict()
+for instance in ec2_instances:
+    for tag in instance["Tags"]:
+        if tag["Key"] in unique_tags.keys():
+            unique_tags[tag["Key"]].add(tag["Value"])
+        else:
+            unique_tags[tag["Key"]] = {tag["Value"]}
+
+sorted_tag_keys = sorted(unique_tags.keys())
+
+tag_key_questions = [
+    inquirer.List(
+        "bastion",
+        message="What tag_key should I use to find bastions?",
+        choices=sorted_tag_keys
+    ),
+    inquirer.List(
+        "hosts",
+        message="What tag_key do you want instances to have?",
+        choices=sorted_tag_keys
+    )
+]
+
+tag_key = inquirer.prompt(tag_key_questions)
+
+tag_value_questions = [
+    inquirer.List(
+        "bastion",
+        message="What tag_value should I use to find bastions?",
+        choices=sorted(unique_tags[tag_key["bastion"]])
+    ),
+    inquirer.List(
+        "hosts",
+        message="What tag_value do you want instances to have?",
+        choices=sorted(unique_tags[tag_key["hosts"]])
+    )
+]
+
+tag_value = inquirer.prompt(tag_value_questions)
+
+bastions = dict()
+ips_to_ssh = []
+for instance in ec2_instances:
+    if "State" in instance:
+        if instance["State"]["Name"] == "running":
+            instance_tags = dict()
+            for tag in instance["Tags"]:
+                instance_tags[tag["Key"]] = tag["Value"]
+            # find bastions
+            if instance_tags.get(tag_key["bastion"]) == tag_value["bastion"]:
+                bastions[instance_tags["Name"]] = instance["PublicIpAddress"]
+                continue
+            if instance_tags.get(tag_key["hosts"]) == tag_value["hosts"]:
+                ips_to_ssh += [
+                    ip["PrivateIpAddress"]
+                    for interface in instance["NetworkInterfaces"]
+                    for ip in interface["PrivateIpAddresses"]
+                ]
+
+home_dir = Path.home()
+ssh_dir = home_dir / ".ssh"
+ssh_keys = []
+for ssh_key in ssh_dir.iterdir():
+    test_file = run(args=f"file {ssh_key.__str__()}", shell=True, capture_output=True)
+    if test_file.stdout.endswith(b"private key\n"):
+        ssh_keys.append(ssh_key.__str__())
+
+sorted_ssh_keys = sorted(ssh_keys)
+ssh_questions = [
+    inquirer.List(
+        "bastion_name",
+        message="Which bastion should I proxy through?",
+        choices=sorted(bastions.keys())
+    ),
+    inquirer.List(
+        "bastion_ssh_key",
+        message="Which private key should I use for the bastion host?",
+        choices=sorted_ssh_keys
+    ),
+    inquirer.List(
+        "bastion_user",
+        message="Which ssh user should I user for the bastion host?",
+        choices=known_ssh_users
+    ),
+    inquirer.List(
+        "ssh_key",
+        message="Which private key should I use for the hosts?",
+        choices=sorted_ssh_keys
+    ),
+    inquirer.List(
+        "user",
+        message="Which ssh user should I use for the hosts?",
+        choices=known_ssh_users
+    )
+]
+
+ssh_params = inquirer.prompt(ssh_questions)
+proxy_command = " ".join([
+    "ssh",
+    "-i",
+    ssh_params['bastion_ssh_key'],
+    f"{ssh_params['bastion_user']}@{bastions[ssh_params['bastion_name']]}",
+    "-W %h:%p"
+])
+tmux_cssh_command = " ".join([
+    "tmux-cssh",
+    "-u",
+    ssh_params["user"],
+    "-i",
+    ssh_params["ssh_key"],
+    "-sa",
+    f"\"-o ProxyCommand='{proxy_command}'\""
+])
+run(
+    args=f"{tmux_cssh_command} {' '.join(ips_to_ssh)}",
+    shell=True
+)
