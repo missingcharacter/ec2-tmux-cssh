@@ -30,7 +30,7 @@ $ AWS_PROFILE=your-aws-profile poetry run python ec2-tmux-cssh
    aws:ec2launchtemplate:id
    aws:ec2launchtemplate:version
 
-[?] What tag_key do you want instances to have?: Name
+[?] What tag_key should I use to find instances?: Name
  > Name
    Role
    aws:autoscaling:groupName
@@ -40,11 +40,11 @@ $ AWS_PROFILE=your-aws-profile poetry run python ec2-tmux-cssh
    aws:ec2launchtemplate:id
    aws:ec2launchtemplate:version
 
-[?] What tag_value should I use to find bastions?: bastion
+[?] What Role value should I use to find bastions?: bastion
    DB
  > bastion
 
-[?] What tag_value do you want instances to have?: qa-ecs-cluster
+[?] What Name value should I use to find instances?: qa-ecs-cluster
  > qa-ecs-cluster
    rabbitmq
    ecs-cluster
