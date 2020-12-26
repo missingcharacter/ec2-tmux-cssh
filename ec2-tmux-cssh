@@ -67,18 +67,21 @@ def get_all_ec2_instances(client_ec2: BaseClient):
     ]
 
 
+def get_unique_tags(ec2_list: list[dict]) -> dict:
+    tags = {}
+    for host in ec2_list:
+        for tag in host["Tags"]:
+            if tag["Key"] in tags.keys():
+                tags[tag["Key"]].add(tag["Value"])
+            else:
+                tags[tag["Key"]] = {tag["Value"]}
+    return tags
+
+
 known_ssh_users = sorted(["ubuntu", "ec2-user", "centos", "admin", "core", "fedora", "root", "bitnami"])
 ec2_client = boto3.client('ec2')
-
 ec2_instances = get_all_ec2_instances(client_ec2=ec2_client)
-
-unique_tags = dict()
-for instance in ec2_instances:
-    for tag in instance["Tags"]:
-        if tag["Key"] in unique_tags.keys():
-            unique_tags[tag["Key"]].add(tag["Value"])
-        else:
-            unique_tags[tag["Key"]] = {tag["Value"]}
+unique_tags = get_unique_tags(ec2_list=ec2_instances)
 
 sorted_tag_keys = sorted(unique_tags.keys())
 
