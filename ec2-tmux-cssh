@@ -5,7 +5,7 @@ import inquirer
 from pathlib import Path
 from subprocess import run
 
-known_ssh_users = sorted(["ubuntu", "ec2-user", "centos"])
+known_ssh_users = sorted(["ubuntu", "ec2-user", "centos", "admin", "core", "fedora", "root", "bitnami"])
 ec2_client = boto3.client('ec2')
 
 ec2_instances = [
