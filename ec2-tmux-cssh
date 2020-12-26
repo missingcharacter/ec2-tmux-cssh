@@ -94,7 +94,8 @@ def get_user_ssh_keys() -> list[str]:
 known_ssh_users = sorted(["ubuntu", "ec2-user", "centos", "admin", "core", "fedora", "root", "bitnami"])
 ec2_client = boto3.client('ec2')
 ec2_instances = get_all_ec2_instances(client_ec2=ec2_client)
-unique_tags = get_unique_tags(ec2_list=ec2_instances)
+running_instances = get_running(ec2_list=ec2_instances)
+unique_tags = get_unique_tags(ec2_list=running_instances)
 
 sorted_tag_keys = sorted(unique_tags.keys())
 
@@ -128,7 +129,6 @@ tag_value_questions = [
 
 tag_value = inquirer.prompt(tag_value_questions)
 
-running_instances = get_running(ec2_list=ec2_instances)
 bastions = get_bastions(ec2_list=running_instances, key=tag_key["bastion"], value=tag_value["bastion"])
 ips_to_ssh = get_all_ips(ec2_list=running_instances, key=tag_key["hosts"], value=tag_value["hosts"])
 
