@@ -78,6 +78,19 @@ def get_unique_tags(ec2_list: list[dict]) -> dict:
     return tags
 
 
+def get_user_ssh_keys() -> list[str]:
+    home_dir = Path.home()
+    ssh_dir = home_dir / ".ssh"
+    return [
+        ssh_key.__str__()
+        for ssh_key in ssh_dir.iterdir() if run(
+            args=f"file {ssh_key.__str__()}",
+            shell=True,
+            capture_output=True
+        ).stdout.endswith(b"private key\n")
+    ]
+
+
 known_ssh_users = sorted(["ubuntu", "ec2-user", "centos", "admin", "core", "fedora", "root", "bitnami"])
 ec2_client = boto3.client('ec2')
 ec2_instances = get_all_ec2_instances(client_ec2=ec2_client)
@@ -119,15 +132,7 @@ running_instances = get_running(ec2_list=ec2_instances)
 bastions = get_bastions(ec2_list=running_instances, key=tag_key["bastion"], value=tag_value["bastion"])
 ips_to_ssh = get_all_ips(ec2_list=running_instances, key=tag_key["hosts"], value=tag_value["hosts"])
 
-home_dir = Path.home()
-ssh_dir = home_dir / ".ssh"
-ssh_keys = []
-for ssh_key in ssh_dir.iterdir():
-    test_file = run(args=f"file {ssh_key.__str__()}", shell=True, capture_output=True)
-    if test_file.stdout.endswith(b"private key\n"):
-        ssh_keys.append(ssh_key.__str__())
-
-sorted_ssh_keys = sorted(ssh_keys)
+sorted_ssh_keys = sorted(get_user_ssh_keys())
 ssh_questions = [
     inquirer.List(
         "bastion_name",
