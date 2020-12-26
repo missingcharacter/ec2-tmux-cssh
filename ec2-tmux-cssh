@@ -33,7 +33,7 @@ tag_key_questions = [
     ),
     inquirer.List(
         "hosts",
-        message="What tag_key do you want instances to have?",
+        message="What tag_key should I use to find instances?",
         choices=sorted_tag_keys
     )
 ]
@@ -43,12 +43,12 @@ tag_key = inquirer.prompt(tag_key_questions)
 tag_value_questions = [
     inquirer.List(
         "bastion",
-        message="What tag_value should I use to find bastions?",
+        message=f"What {tag_key['bastion']} value should I use to find bastions?",
         choices=sorted(unique_tags[tag_key["bastion"]])
     ),
     inquirer.List(
         "hosts",
-        message="What tag_value do you want instances to have?",
+        message=f"What {tag_key['hosts']} value should I use to find instances?",
         choices=sorted(unique_tags[tag_key["hosts"]])
     )
 ]
@@ -60,9 +60,10 @@ ips_to_ssh = []
 for instance in ec2_instances:
     if "State" in instance:
         if instance["State"]["Name"] == "running":
-            instance_tags = dict()
-            for tag in instance["Tags"]:
-                instance_tags[tag["Key"]] = tag["Value"]
+            instance_tags = {
+                tag["Key"]: tag["Value"]
+                for tag in instance["Tags"]
+            }
             # find bastions
             if instance_tags.get(tag_key["bastion"]) == tag_value["bastion"]:
                 bastions[instance_tags["Name"]] = instance["PublicIpAddress"]
