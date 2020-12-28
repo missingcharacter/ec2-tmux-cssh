@@ -28,9 +28,9 @@ hosts_tag_value = inquirer.prompt(
 
 ips_to_ssh = get_all_ips(ec2_list=running_instances, key=hosts_tag_key["answer"], value=hosts_tag_value["answer"])
 
-sorted_ssh_keys = sorted(get_user_ssh_keys())
+ssh_keys = get_user_ssh_keys()
 hosts_ssh_questions = [
-    inquirer.List("ssh_key", message="Which private key should I use for the hosts?", choices=sorted_ssh_keys),
+    inquirer.List("ssh_key", message="Which private key should I use for the hosts?", choices=ssh_keys),
     inquirer.List("user", message="Which ssh user should I use for the hosts?", choices=known_ssh_users),
 ]
 hosts_ssh_params = inquirer.prompt(hosts_ssh_questions)
@@ -59,9 +59,7 @@ if proxy_bastion["answer"]:
     )
     bastions_ssh_questions = [
         inquirer.List("name", message="Which bastion should I proxy through?", choices=sorted(bastions.keys())),
-        inquirer.List(
-            "ssh_key", message="Which private key should I use for the bastion host?", choices=sorted_ssh_keys
-        ),
+        inquirer.List("ssh_key", message="Which private key should I use for the bastion host?", choices=ssh_keys),
         inquirer.List("user", message="Which ssh user should I user for the bastion host?", choices=known_ssh_users),
     ]
     bastions_ssh_params = inquirer.prompt(bastions_ssh_questions)

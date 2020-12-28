@@ -72,8 +72,10 @@ def get_unique_tags(ec2_list: list[dict]) -> dict:
 def get_user_ssh_keys() -> list[str]:
     home_dir = Path.home()
     ssh_dir = home_dir / ".ssh"
-    return [
-        ssh_key.__str__()
-        for ssh_key in ssh_dir.iterdir()
-        if run(args=f"file {ssh_key.__str__()}", shell=True, capture_output=True).stdout.endswith(b"private key\n")
-    ]
+    return sorted(
+        [
+            ssh_key.__str__()
+            for ssh_key in ssh_dir.iterdir()
+            if run(args=f"file {ssh_key.__str__()}", shell=True, capture_output=True).stdout.endswith(b"private key\n")
+        ]
+    )
