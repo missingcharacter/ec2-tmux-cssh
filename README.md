@@ -19,7 +19,8 @@ tmux cluster ssh to multiple ec2 instances
 
 ```
 $ cd /path/to/this/repository
-$ AWS_PROFILE=your-aws-profile poetry run python ec2-tmux-cssh
+$ AWS_PROFILE=***REMOVED*** poetry run poe main
+Poe => python ./ec2-tmux-cssh.py
 [?] What tag_key should I use to find instances?: Name
  > Name
    Role
