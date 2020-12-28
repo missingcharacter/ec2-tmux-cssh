@@ -10,6 +10,8 @@ tmux cluster ssh to multiple ec2 instances
 - Private ssh keys for the servers you will try to connect to in `~/.ssh`
 - [file](https://man7.org/linux/man-pages/man1/file.1.html) in your `${PATH}`
 - [tmux-cssh](https://github.com/zinic/tmux-cssh/blob/042fdec2dc51bcfe62499e72f589dc9c146ab71a/tmux-cssh) in your `${PATH}`
+  - [tmux](https://github.com/tmux/tmux/wiki) in your `${PATH}`
+  - [ssh](https://www.openssh.com/) in your `${PATH}`
 - [poetry](https://github.com/python-poetry/poetry)
 
 ## Before first run
