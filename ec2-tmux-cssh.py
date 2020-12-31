@@ -12,21 +12,13 @@ running_instances = get_running(ec2_list=ec2_instances)
 unique_tags = get_unique_tags(ec2_list=running_instances)
 sorted_tag_keys = sorted(unique_tags.keys())
 
-hosts_tag_key = inquirer.prompt(
-    [inquirer.List("answer", message="What tag_key should I use to find instances?", choices=sorted_tag_keys)]
+hosts_tag_key = inquirer.list_input(message="What tag_key should I use to find instances?", choices=sorted_tag_keys)
+
+hosts_tag_value = inquirer.list_input(
+    message=f"What {hosts_tag_key} value should I use to find instances?", choices=sorted(unique_tags[hosts_tag_key])
 )
 
-hosts_tag_value = inquirer.prompt(
-    [
-        inquirer.List(
-            "answer",
-            message=f"What {hosts_tag_key['answer']} value should I use to find instances?",
-            choices=sorted(unique_tags[hosts_tag_key["answer"]]),
-        )
-    ]
-)
-
-ips_to_ssh = get_all_ips(ec2_list=running_instances, key=hosts_tag_key["answer"], value=hosts_tag_value["answer"])
+ips_to_ssh = get_all_ips(ec2_list=running_instances, key=hosts_tag_key, value=hosts_tag_value)
 
 ssh_keys = get_user_ssh_keys()
 hosts_ssh_questions = [
@@ -37,26 +29,17 @@ hosts_ssh_params = inquirer.prompt(hosts_ssh_questions)
 tmux_cssh_args = ["tmux-cssh", "-u", hosts_ssh_params["user"], "-i", hosts_ssh_params["ssh_key"]]
 
 # bastion questions
-proxy_bastion = inquirer.prompt(
-    [inquirer.Confirm("answer", message="Will you proxy through a bastion host?", default=True)]
-)
-if proxy_bastion["answer"]:
-    bastions_tag_key = inquirer.prompt(
-        [inquirer.List("answer", message="What tag_key should I use to find bastions?", choices=sorted_tag_keys)]
+proxy_bastion = inquirer.confirm(message="Will you proxy through a bastion host?", default=False)
+if proxy_bastion:
+    bastions_tag_key = inquirer.list_input(
+        message="What tag_key should I use to find bastions?", choices=sorted_tag_keys
     )
 
-    bastions_tag_value = inquirer.prompt(
-        [
-            inquirer.List(
-                "answer",
-                message=f"What {bastions_tag_key['answer']} value should I use to find bastions?",
-                choices=sorted(unique_tags[bastions_tag_key["answer"]]),
-            )
-        ]
+    bastions_tag_value = inquirer.list_input(
+        message=f"What {bastions_tag_key} value should I use to find bastions?",
+        choices=sorted(unique_tags[bastions_tag_key]),
     )
-    bastions = get_bastions(
-        ec2_list=running_instances, key=bastions_tag_key["answer"], value=bastions_tag_value["answer"]
-    )
+    bastions = get_bastions(ec2_list=running_instances, key=bastions_tag_key, value=bastions_tag_value)
     bastions_ssh_questions = [
         inquirer.List("name", message="Which bastion should I proxy through?", choices=sorted(bastions.keys())),
         inquirer.List("ssh_key", message="Which private key should I use for the bastion host?", choices=ssh_keys),

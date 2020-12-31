@@ -47,10 +47,7 @@ def get_hosts_with_key_value(ec2_list: list[dict], key: str, value: str) -> Valu
         for index, host in enumerate(ec2_list)
         if is_key_value_in_instance(instance=host, key=key, value=value)
     }
-    [
-        ec2_list.pop(index)
-        for index in sorted(hosts.keys(), reverse=True)
-    ]
+    [ec2_list.pop(index) for index in sorted(hosts.keys(), reverse=True)]
     return hosts.values()
 
 
@@ -66,29 +63,13 @@ def get_bastion(instance: dict) -> dict:
 
 
 def get_bastions(ec2_list: list[dict], key: str, value: str) -> dict:
-    hosts = get_hosts_with_key_value(
-        ec2_list=ec2_list,
-        key=key,
-        value=value
-    )
-    return {
-        k: v
-        for host in hosts
-        for k, v in get_bastion(host).items()
-    }
+    hosts = get_hosts_with_key_value(ec2_list=ec2_list, key=key, value=value)
+    return {k: v for host in hosts for k, v in get_bastion(host).items()}
 
 
 def get_all_ips(ec2_list: list[dict], key: str, value: str) -> list[str]:
-    hosts = get_hosts_with_key_value(
-        ec2_list=ec2_list,
-        key=key,
-        value=value
-    )
-    return [
-        ip
-        for host in hosts
-        for ip in ips_in_instance(host)
-    ]
+    hosts = get_hosts_with_key_value(ec2_list=ec2_list, key=key, value=value)
+    return [ip for host in hosts for ip in ips_in_instance(host)]
 
 
 def get_user_ssh_keys() -> list[str]:
