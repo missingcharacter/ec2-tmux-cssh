@@ -29,7 +29,7 @@ def main(
     bastions_tag_value: Optional[str] = None,
     bastion_name: Optional[str] = None,
     bastion_ssh_key: Optional[str] = None,
-    bastion_user: Optional[str] = None
+    bastion_user: Optional[str] = None,
 ) -> None:
     known_ssh_users = sorted(["ubuntu", "ec2-user", "centos", "admin", "core", "fedora", "root", "bitnami"])
     ec2_client = boto3.client("ec2")
@@ -40,20 +40,19 @@ def main(
 
     if hosts_tag_key is None:
         hosts_tag_key = inquirer.list_input(
-            message="What tag_key should I use to find instances?",
-            choices=sorted_tag_keys
+            message="What tag_key should I use to find instances?", choices=sorted_tag_keys
         )
 
     if hosts_tag_value is None:
         hosts_tag_value = inquirer.list_input(
             message=f"What {hosts_tag_key} value should I use to find instances?",
-            choices=sorted(unique_tags[hosts_tag_key])
+            choices=sorted(unique_tags[hosts_tag_key]),
         )
 
     ips_to_ssh = get_all_ips(ec2_list=running_instances, key=hosts_tag_key, value=hosts_tag_value)
+    ssh_keys = get_user_ssh_keys()
 
     if hosts_ssh_key is None:
-        ssh_keys = get_user_ssh_keys()
         hosts_ssh_key = inquirer.list_input(message="Which private key should I use for the hosts?", choices=ssh_keys)
 
     if hosts_user is None:
@@ -78,20 +77,17 @@ def main(
 
         if bastion_name is None:
             bastion_name = inquirer.list_input(
-                message="Which bastion should I proxy through?",
-                choices=sorted(bastions.keys())
+                message="Which bastion should I proxy through?", choices=sorted(bastions.keys())
             )
 
         if bastion_ssh_key is None:
             bastion_ssh_key = inquirer.list_input(
-                message="Which private key should I use for the bastion host?",
-                choices=ssh_keys
+                message="Which private key should I use for the bastion host?", choices=ssh_keys
             )
 
         if bastion_user is None:
             bastion_user = inquirer.list_input(
-                message="Which ssh user should I user for the bastion host?",
-                choices=known_ssh_users
+                message="Which ssh user should I user for the bastion host?", choices=known_ssh_users
             )
 
         proxy_command = " ".join(
