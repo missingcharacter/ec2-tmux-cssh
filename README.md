@@ -20,9 +20,11 @@ tmux cluster ssh to multiple ec2 instances
 
 ## How to use
 
+### Example: Only providing use bastion option
+
 ```
 $ cd /path/to/this/repository
-$ AWS_PROFILE=***REMOVED*** poetry run python ./ec2-tmux-cssh.py
+$ AWS_PROFILE=***REMOVED*** poetry run python ./ec2-tmux-cssh.py --use-bastion
 [?] What tag_key should I use to find instances?: Name
  > Name
    Role
@@ -50,8 +52,6 @@ $ AWS_PROFILE=***REMOVED*** poetry run python ./ec2-tmux-cssh.py
    centos
  > ec2-user
    ubuntu
-
-[?] Will you proxy through a bastion host? (Y/n): Y
 
 [?] What tag_key should I use to find bastions?: Role
    Name
@@ -92,4 +92,24 @@ I will tmux-cssh through bastion qa-bastion to these IPs: ['10.10.21.104', '10.1
 * Connecting 'ssh  -o ProxyCommand='ssh -i /Users/macuser/.ssh/qa-bastion.pem ubuntu@SomePublicIP -W %h:%p' -i /Users/macuser/.ssh/qa.pem ec2-user@10.10.20.83'
 * Connecting 'ssh  -o ProxyCommand='ssh -i /Users/macuser/.ssh/qa-bastion.pem ubuntu@SomePublicIP -W %h:%p' -i /Users/macuser/.ssh/qa.pem ec2-user@10.10.20.39'
 [exited]
+```
+
+### All options below
+
+```shell
+$ poetry run python ec2-tmux-cssh.py --help
+Usage: ec2-tmux-cssh.py [OPTIONS]
+
+Options:
+  --hosts-tag-key TEXT       Tag key to find hosts with
+  --hosts-tag-value TEXT     Tag value to find hosts with
+  --hosts-ssh-key TEXT       SSH Private Key for hosts
+  --hosts-user TEXT          SSH user for hosts
+  --use-bastion              Proxy SSH through a bastion host
+  --bastions-tag-key TEXT    Tag key to find bastions with
+  --bastions-tag-value TEXT  Tag value to find bastions with
+  --bastion-name TEXT        Bastion EC2 Name
+  --bastion-ssh-key TEXT     SSH Private Key for bastion
+  --bastion-user TEXT        SSH user for bastion
+  --help                     Show this message and exit.
 ```
