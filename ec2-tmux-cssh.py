@@ -38,7 +38,7 @@ def main(
 ) -> None:
     ec2_client, ssh_users, running_instances, unique_tags, sorted_tag_keys = get_basics()
 
-    if is_ecs:
+    if is_ecs or ecs_cluster or ecs_service:
         ips_to_ssh = get_all_ecs_ips(ec2_client=ec2_client, ecs_cluster=ecs_cluster, ecs_service=ecs_service)
     else:
         ips_to_ssh = get_all_ec2_ips(
