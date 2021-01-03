@@ -3,13 +3,7 @@ import click
 import inquirer
 
 from typing import Optional
-from utils import (
-    get_all_ec2_ips,
-    get_all_ecs_ips,
-    get_basics,
-    get_user_ssh_keys,
-    tmux_use_bastion
-)
+from utils import get_all_ec2_ips, get_all_ecs_ips, get_basics, get_user_ssh_keys, tmux_use_bastion
 from subprocess import run
 
 
@@ -40,7 +34,7 @@ def main(
     bastion_ssh_key: Optional[str] = None,
     bastion_user: Optional[str] = None,
     ecs_cluster: Optional[str] = None,
-    ecs_service: Optional[str] = None
+    ecs_service: Optional[str] = None,
 ) -> None:
     ec2_client, ssh_users, running_instances, unique_tags, sorted_tag_keys = get_basics()
 
@@ -52,7 +46,7 @@ def main(
             hosts_tag_key=hosts_tag_key,
             hosts_tag_value=hosts_tag_value,
             tag_keys=sorted_tag_keys,
-            unique_tags=unique_tags
+            unique_tags=unique_tags,
         )
 
     ssh_keys = get_user_ssh_keys()
@@ -77,7 +71,7 @@ def main(
             bastions_tag_value=bastions_tag_value,
             bastion_name=bastion_name,
             bastion_ssh_key=bastion_ssh_key,
-            bastion_user=bastion_user
+            bastion_user=bastion_user,
         )
 
     tmux_cssh_command = " ".join(tmux_cssh_args)
