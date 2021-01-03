@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
-import boto3
 import click
 import inquirer
 
 from typing import Optional
-from utils import get_all_ec2_instances, get_all_ips, get_bastions, get_running, get_unique_tags, get_user_ssh_keys
+from utils import (
+    get_all_ec2_ips,
+    get_all_ecs_ips,
+    get_basics,
+    get_user_ssh_keys,
+    tmux_use_bastion
+)
 from subprocess import run
 
 
 @click.command()
+@click.option("--is-ecs", is_flag=True, default=False, help="Find ec2 instances where ecs service runs on")
+@click.option("--ecs-cluster", help="ECS Cluster where ECS Service runs on")
+@click.option("--ecs-service", help="ECS Service we want to find EC2 instances for")
 @click.option("--hosts-tag-key", help="Tag key to find hosts with")
 @click.option("--hosts-tag-value", help="Tag value to find hosts with")
 @click.option("--hosts-ssh-key", help="SSH Private Key for hosts")
@@ -20,6 +28,7 @@ from subprocess import run
 @click.option("--bastion-ssh-key", help="SSH Private Key for bastion")
 @click.option("--bastion-user", help="SSH user for bastion")
 def main(
+    is_ecs: bool = False,
     use_bastion: bool = False,
     hosts_tag_key: Optional[str] = None,
     hosts_tag_value: Optional[str] = None,
@@ -30,76 +39,46 @@ def main(
     bastion_name: Optional[str] = None,
     bastion_ssh_key: Optional[str] = None,
     bastion_user: Optional[str] = None,
+    ecs_cluster: Optional[str] = None,
+    ecs_service: Optional[str] = None
 ) -> None:
-    known_ssh_users = sorted(["ubuntu", "ec2-user", "centos", "admin", "core", "fedora", "root", "bitnami"])
-    ec2_client = boto3.client("ec2")
-    ec2_instances = get_all_ec2_instances(client_ec2=ec2_client)
-    running_instances = get_running(ec2_list=ec2_instances)
-    unique_tags = get_unique_tags(ec2_list=running_instances)
-    sorted_tag_keys = sorted(unique_tags.keys())
+    ec2_client, ssh_users, running_instances, unique_tags, sorted_tag_keys = get_basics()
 
-    if hosts_tag_key is None:
-        hosts_tag_key = inquirer.list_input(
-            message="What tag_key should I use to find instances?", choices=sorted_tag_keys
+    if is_ecs:
+        ips_to_ssh = get_all_ecs_ips(ec2_client=ec2_client, ecs_cluster=ecs_cluster, ecs_service=ecs_service)
+    else:
+        ips_to_ssh = get_all_ec2_ips(
+            ec2_list=running_instances,
+            hosts_tag_key=hosts_tag_key,
+            hosts_tag_value=hosts_tag_value,
+            tag_keys=sorted_tag_keys,
+            unique_tags=unique_tags
         )
 
-    if hosts_tag_value is None:
-        hosts_tag_value = inquirer.list_input(
-            message=f"What {hosts_tag_key} value should I use to find instances?",
-            choices=sorted(unique_tags[hosts_tag_key]),
-        )
-
-    ips_to_ssh = get_all_ips(ec2_list=running_instances, key=hosts_tag_key, value=hosts_tag_value)
     ssh_keys = get_user_ssh_keys()
 
     if hosts_ssh_key is None:
         hosts_ssh_key = inquirer.list_input(message="Which private key should I use for the hosts?", choices=ssh_keys)
 
     if hosts_user is None:
-        hosts_user = inquirer.list_input(message="Which ssh user should I use for the hosts?", choices=known_ssh_users)
+        hosts_user = inquirer.list_input(message="Which ssh user should I use for the hosts?", choices=ssh_users)
 
     tmux_cssh_args = ["tmux-cssh", "-u", hosts_user, "-i", hosts_ssh_key]
 
     # bastion questions
     if use_bastion:
-        if bastions_tag_key is None:
-            bastions_tag_key = inquirer.list_input(
-                message="What tag_key should I use to find bastions?", choices=sorted_tag_keys
-            )
-
-        if bastions_tag_value is None:
-            bastions_tag_value = inquirer.list_input(
-                message=f"What {bastions_tag_key} value should I use to find bastions?",
-                choices=sorted(unique_tags[bastions_tag_key]),
-            )
-
-        bastions = get_bastions(ec2_list=running_instances, key=bastions_tag_key, value=bastions_tag_value)
-
-        if bastion_name is None:
-            bastion_name = inquirer.list_input(
-                message="Which bastion should I proxy through?", choices=sorted(bastions.keys())
-            )
-
-        if bastion_ssh_key is None:
-            bastion_ssh_key = inquirer.list_input(
-                message="Which private key should I use for the bastion host?", choices=ssh_keys
-            )
-
-        if bastion_user is None:
-            bastion_user = inquirer.list_input(
-                message="Which ssh user should I user for the bastion host?", choices=known_ssh_users
-            )
-
-        proxy_command = " ".join(
-            [
-                "ssh",
-                "-i",
-                bastion_ssh_key,
-                f"{bastion_user}@{bastions[bastion_name]}",
-                "-W %h:%p",
-            ]
+        tmux_cssh_args += tmux_use_bastion(
+            tag_keys=sorted_tag_keys,
+            ssh_keys=ssh_keys,
+            ssh_users=ssh_users,
+            unique_tags=unique_tags,
+            instances_running=running_instances,
+            bastions_tag_key=bastions_tag_key,
+            bastions_tag_value=bastions_tag_value,
+            bastion_name=bastion_name,
+            bastion_ssh_key=bastion_ssh_key,
+            bastion_user=bastion_user
         )
-        tmux_cssh_args += ["-sa", f"\"-o ProxyCommand='{proxy_command}'\""]
 
     tmux_cssh_command = " ".join(tmux_cssh_args)
     run(args=f"{tmux_cssh_command} {' '.join(ips_to_ssh)}", shell=True)
