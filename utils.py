@@ -89,16 +89,10 @@ def all_ips_in_all_hosts(hosts: list[dict]) -> list[str]:
 
 
 def get_all_ec2_ips(
-        ec2_list: list[dict],
-        hosts_tag_key: str,
-        hosts_tag_value: str,
-        tag_keys: list[str],
-        unique_tags: dict
+    ec2_list: list[dict], hosts_tag_key: str, hosts_tag_value: str, tag_keys: list[str], unique_tags: dict
 ) -> list[str]:
     if hosts_tag_key is None:
-        hosts_tag_key = inquirer.list_input(
-            message="What tag_key should I use to find instances?", choices=tag_keys
-        )
+        hosts_tag_key = inquirer.list_input(message="What tag_key should I use to find instances?", choices=tag_keys)
 
     if hosts_tag_value is None:
         hosts_tag_value = inquirer.list_input(
@@ -123,21 +117,19 @@ def get_user_ssh_keys() -> list[str]:
 
 
 def tmux_use_bastion(
-        tag_keys: list[str],
-        ssh_keys: list[str],
-        ssh_users: list[str],
-        unique_tags: dict,
-        instances_running: list[dict],
-        bastions_tag_key: Optional[str] = None,
-        bastions_tag_value: Optional[str] = None,
-        bastion_name: Optional[str] = None,
-        bastion_ssh_key: Optional[str] = None,
-        bastion_user: Optional[str] = None
+    tag_keys: list[str],
+    ssh_keys: list[str],
+    ssh_users: list[str],
+    unique_tags: dict,
+    instances_running: list[dict],
+    bastions_tag_key: Optional[str] = None,
+    bastions_tag_value: Optional[str] = None,
+    bastion_name: Optional[str] = None,
+    bastion_ssh_key: Optional[str] = None,
+    bastion_user: Optional[str] = None,
 ) -> list[str]:
     if bastions_tag_key is None:
-        bastions_tag_key = inquirer.list_input(
-            message="What tag_key should I use to find bastions?", choices=tag_keys
-        )
+        bastions_tag_key = inquirer.list_input(message="What tag_key should I use to find bastions?", choices=tag_keys)
 
     if bastions_tag_value is None:
         bastions_tag_value = inquirer.list_input(
@@ -175,25 +167,18 @@ def tmux_use_bastion(
 
 
 def get_all_ecs_clusters(client_ecs: BaseClient) -> list[str]:
-    return sorted([
-        cluster
-        for page in client_ecs.get_paginator("list_clusters").paginate()
-        for cluster in page["clusterArns"]
-    ])
+    return sorted(
+        [cluster for page in client_ecs.get_paginator("list_clusters").paginate() for cluster in page["clusterArns"]]
+    )
 
 
 def get_all_ecs_services_of_type(
-        client_ecs: BaseClient,
-        cluster_arn: str,
-        launch_type: str,
-        scheduling_strategy: str
+    client_ecs: BaseClient, cluster_arn: str, launch_type: str, scheduling_strategy: str
 ) -> list:
     return [
         service
         for page in client_ecs.get_paginator("list_services").paginate(
-            cluster=cluster_arn,
-            launchType=launch_type,
-            schedulingStrategy=scheduling_strategy
+            cluster=cluster_arn, launchType=launch_type, schedulingStrategy=scheduling_strategy
         )
         for service in page.get("serviceArns", [])
     ]
@@ -201,16 +186,10 @@ def get_all_ecs_services_of_type(
 
 def get_all_services_in_ecs_cluster(client_ecs: BaseClient, cluster_arn: str) -> list[str]:
     services: list = get_all_ecs_services_of_type(
-        client_ecs=client_ecs,
-        cluster_arn=cluster_arn,
-        launch_type="EC2",
-        scheduling_strategy="REPLICA"
+        client_ecs=client_ecs, cluster_arn=cluster_arn, launch_type="EC2", scheduling_strategy="REPLICA"
     )
     services += get_all_ecs_services_of_type(
-        client_ecs=client_ecs,
-        cluster_arn=cluster_arn,
-        launch_type="EC2",
-        scheduling_strategy="DAEMON"
+        client_ecs=client_ecs, cluster_arn=cluster_arn, launch_type="EC2", scheduling_strategy="DAEMON"
     )
     return sorted(services)
 
@@ -218,53 +197,42 @@ def get_all_services_in_ecs_cluster(client_ecs: BaseClient, cluster_arn: str) ->
 def get_ec2_where_service(client_ecs: BaseClient, cluster_arn: str, service: str) -> list[str]:
     task_arns = {
         task
-        for page in client_ecs.get_paginator("list_tasks").paginate(
-            cluster=cluster_arn,
-            serviceName=service
-        )
+        for page in client_ecs.get_paginator("list_tasks").paginate(cluster=cluster_arn, serviceName=service)
         for task in page["taskArns"]
     }
-    print(f"task definitions are {task_arns}")
+
     if task_arns:
         container_instances = {
             task["containerInstanceArn"]
-            for task in client_ecs.describe_tasks(
-                cluster=cluster_arn,
-                tasks=list(task_arns)
-            )["tasks"]
+            for task in client_ecs.describe_tasks(cluster=cluster_arn, tasks=list(task_arns))["tasks"]
         }
     else:
         raise Exception("No container instances were found")
 
-    print(f"container instances are {container_instances}")
-
-    return list({
-        instance["ec2InstanceId"]
-        for instance in client_ecs.describe_container_instances(
-            cluster=cluster_arn,
-            containerInstances=list(container_instances)
-        )["containerInstances"]
-    })
+    return list(
+        {
+            instance["ec2InstanceId"]
+            for instance in client_ecs.describe_container_instances(
+                cluster=cluster_arn, containerInstances=list(container_instances)
+            )["containerInstances"]
+        }
+    )
 
 
 def get_all_ecs_ips(
-        ec2_client: BaseClient,
-        ecs_cluster: Optional[str] = None,
-        ecs_service: Optional[str] = None
+    ec2_client: BaseClient, ecs_cluster: Optional[str] = None, ecs_service: Optional[str] = None
 ) -> list[str]:
     ecs_client = boto3.client("ecs")
     if ecs_cluster is None:
         ecs_cluster = inquirer.list_input(
             message="What ECS Cluster do you want to look services for?",
-            choices=get_all_ecs_clusters(
-                client_ecs=ecs_client
-            )
+            choices=get_all_ecs_clusters(client_ecs=ecs_client),
         )
 
     if ecs_service is None:
         ecs_service = inquirer.list_input(
             message="What ECS Service do you want to find EC2 instances for?",
-            choices=get_all_services_in_ecs_cluster(client_ecs=ecs_client, cluster_arn=ecs_cluster)
+            choices=get_all_services_in_ecs_cluster(client_ecs=ecs_client, cluster_arn=ecs_cluster),
         )
 
     ec2_instance_ids = get_ec2_where_service(client_ecs=ecs_client, cluster_arn=ecs_cluster, service=ecs_service)
