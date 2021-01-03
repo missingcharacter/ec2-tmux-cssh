@@ -6,7 +6,15 @@ tmux cluster ssh to multiple ec2 instances
 
 ## Requirements
 
-- AWS access to [DescribeInstances](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html)
+- AWS access
+  - EC2 only to [DescribeInstances](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html)
+  - ECS functionality requires:
+    - [DescribeInstances](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html)
+    - [ListClusters](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ListClusters.html)
+    - [ListServices](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ListServices.html)
+    - [ListTasks](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ListTasks.html)
+    - [DescribeTasks](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DescribeTasks.html)
+    - [DescribeContainerInstances](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DescribeContainerInstances.html)
 - Private ssh keys for the servers you will try to connect to in `~/.ssh`
 - [file](https://man7.org/linux/man-pages/man1/file.1.html) in your `${PATH}`
 - [tmux-cssh](https://github.com/zinic/tmux-cssh/blob/042fdec2dc51bcfe62499e72f589dc9c146ab71a/tmux-cssh) in your `${PATH}`
@@ -101,6 +109,9 @@ $ poetry run python ec2-tmux-cssh.py --help
 Usage: ec2-tmux-cssh.py [OPTIONS]
 
 Options:
+  --is-ecs                   Find ec2 instances where ecs service runs on
+  --ecs-cluster TEXT         ECS Cluster where ECS Service runs on
+  --ecs-service TEXT         ECS Service we want to find EC2 instances for
   --hosts-tag-key TEXT       Tag key to find hosts with
   --hosts-tag-value TEXT     Tag value to find hosts with
   --hosts-ssh-key TEXT       SSH Private Key for hosts
