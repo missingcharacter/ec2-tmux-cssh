@@ -3,7 +3,6 @@ import boto3
 import inquirer
 
 from botocore.client import BaseClient
-from collections.abc import ValuesView
 from pathlib import Path
 from subprocess import run
 from typing import Optional
@@ -58,14 +57,14 @@ def is_key_value_in_instance(instance: dict, key: str, value: str) -> bool:
         return False
 
 
-def get_hosts_with_key_value(ec2_list: list[dict], key: str, value: str) -> ValuesView:
+def get_hosts_with_key_value(ec2_list: list[dict], key: str, value: str) -> list[dict]:
     hosts = {
         index: host
         for index, host in enumerate(ec2_list)
         if is_key_value_in_instance(instance=host, key=key, value=value)
     }
     [ec2_list.pop(index) for index in sorted(hosts.keys(), reverse=True)]
-    return hosts.values()
+    return list(hosts.values())
 
 
 def ips_in_instance(instance: dict) -> list[str]:
@@ -100,7 +99,7 @@ def get_all_ec2_ips(
             choices=sorted(unique_tags[hosts_tag_key]),
         )
 
-    ec2_hosts = list(get_hosts_with_key_value(ec2_list=ec2_list, key=hosts_tag_key, value=hosts_tag_value))
+    ec2_hosts = get_hosts_with_key_value(ec2_list=ec2_list, key=hosts_tag_key, value=hosts_tag_value)
     return all_ips_in_all_hosts(hosts=ec2_hosts)
 
 
