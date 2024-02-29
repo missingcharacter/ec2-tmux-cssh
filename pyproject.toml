@@ -12,7 +12,7 @@ inquirer = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
-poethepoet = "^0.24.0"
+poethepoet = "^0.25.0"
 
 [tool.poe.tasks]
 # use `poetry run poe <task>` to run these...

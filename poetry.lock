@@ -64,17 +64,17 @@ wcwidth = ">=0.1.4"
 
 [[package]]
 name = "boto3"
-version = "1.34.13"
+version = "1.34.52"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.8"
 files = [
-    {file = "boto3-1.34.13-py3-none-any.whl", hash = "sha256:4c87e2b25a125321394a1bed374293b00bd0e3895e6401a368aa46e1b70df078"},
-    {file = "boto3-1.34.13.tar.gz", hash = "sha256:789f65adc1d2cb8e5d36db782e07a733242ca1bd851263af173b61411e32034b"},
+    {file = "boto3-1.34.52-py3-none-any.whl", hash = "sha256:898ad2123b18cae8efd85adc56ac2d1925be54592aebc237020d4f16e9a9e7a9"},
+    {file = "boto3-1.34.52.tar.gz", hash = "sha256:66303b5f26d92afb72656ff490b22ea72dfff8bf1a29e4a0c5d5f11ec56245dd"},
 ]
 
 [package.dependencies]
-botocore = ">=1.34.13,<1.35.0"
+botocore = ">=1.34.52,<1.35.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -83,13 +83,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.34.13"
+version = "1.34.52"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.8"
 files = [
-    {file = "botocore-1.34.13-py3-none-any.whl", hash = "sha256:b39f96e658865bd1f3c2d043794b91cd6206f9db531c0a06b53093ed82d41ef7"},
-    {file = "botocore-1.34.13.tar.gz", hash = "sha256:1680b0e0633a546b8d54d1bbd5154e30bb1044d0496e0df7cfd24a383e10b0d3"},
+    {file = "botocore-1.34.52-py3-none-any.whl", hash = "sha256:05567d8aba344826060481ea309555432c96f0febe22bee7cf5a3b6d3a03cec8"},
+    {file = "botocore-1.34.52.tar.gz", hash = "sha256:187da93aec3f2e87d8a31eced16fa2cb9c71fe2d69b0a797f9f7a9220f5bf7ae"},
 ]
 
 [package.dependencies]
@@ -145,13 +145,13 @@ xmod = "*"
 
 [[package]]
 name = "inquirer"
-version = "3.2.0"
+version = "3.2.4"
 description = "Collection of common interactive command line user interfaces, based on Inquirer.js"
 optional = false
 python-versions = ">=3.8.1"
 files = [
-    {file = "inquirer-3.2.0-py3-none-any.whl", hash = "sha256:8b6c6d117414aa1f05e31a6d57679e414232ede022042529bd3bc63dd8683f39"},
-    {file = "inquirer-3.2.0.tar.gz", hash = "sha256:93f4beaad9b887cc3a068198c40837c67eb42b39ea87b3e80fff2a7773e8f29a"},
+    {file = "inquirer-3.2.4-py3-none-any.whl", hash = "sha256:273a4e4a4345ac1afdb17408d40fc8dccf3485db68203357919468561035a763"},
+    {file = "inquirer-3.2.4.tar.gz", hash = "sha256:33b09efc1b742b9d687b540296a8b6a3f773399673321fcc2ab0eb4c109bf9b5"},
 ]
 
 [package.dependencies]
@@ -219,13 +219,13 @@ files = [
 
 [[package]]
 name = "poethepoet"
-version = "0.24.4"
+version = "0.25.0"
 description = "A task runner that works well with poetry."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "poethepoet-0.24.4-py3-none-any.whl", hash = "sha256:fb4ea35d7f40fe2081ea917d2e4102e2310fda2cde78974050ca83896e229075"},
-    {file = "poethepoet-0.24.4.tar.gz", hash = "sha256:ff4220843a87c888cbcb5312c8905214701d0af60ac7271795baa8369b428fef"},
+    {file = "poethepoet-0.25.0-py3-none-any.whl", hash = "sha256:42c0fd654f23e1b7c67aa8aa395c72e15eb275034bd5105171003daf679c1470"},
+    {file = "poethepoet-0.25.0.tar.gz", hash = "sha256:ca8f1d8475aa10d2ceeb26331d2626fc4a6b51df1e7e70d3d0d6481a984faab6"},
 ]
 
 [package.dependencies]
@@ -559,4 +559,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "85a87468ad2f5aa6a00eb4e1e14b0333f6a8d66481ac1989de800686a81e0422"
+content-hash = "0c6b8cce7b463687084ffe1c7a807b3c916c5442c15370f106c0296081f031ab"
