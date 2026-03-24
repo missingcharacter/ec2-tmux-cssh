@@ -3,11 +3,10 @@ name = "ec2-tmux-cssh"
 version = "0.0.1"
 description = "Generates tmux-cssh command based on tag key and value"
 authors = [{ name = "Ricardo Rosales" }]
-requires-python = ">=3.9,<4"
+requires-python = ">=3.10,<4"
 license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -15,14 +14,14 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "boto3>=1.16.43,<2",
-    "inquirer>=3.0.0,<4",
+    "boto3>=1.16.43",
+    "inquirer>=3.0.0",
 ]
 
 [dependency-groups]
 dev = [
-    "black>=20.8b1,<21",
-    "poethepoet>=0.35.0,<0.36",
+    "black>=20.8b1",
+    "poethepoet>=0.42.0",
 ]
 
 [tool.poe.tasks]
