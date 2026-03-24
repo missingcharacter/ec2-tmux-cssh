@@ -34,5 +34,5 @@ lint-fix = { cmd = "black --line-length 120 *.py", help = "Same as `lint`, but w
 main = { cmd = "python ./ec2-tmux-cssh.py", help = "Run ec2-tmux-cssh.py" }
 
 [build-system]
-requires = ["uv_build>=0.10.12,<0.11.0"]
+requires = ["uv_build>=0.11.0,<0.12.0"]
 build-backend = "uv_build"
